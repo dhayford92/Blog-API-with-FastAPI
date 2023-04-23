@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from .schemas import Blog
 from .models import Base, BlogModel
 from .database import SessionLocal, engine
@@ -15,6 +15,8 @@ def get_db():
        yield db
    finally:
        db.close()
+
+
 
 
 @app.post('/blog/create', status_code=201)
@@ -41,4 +43,8 @@ def all_blogs(db: Session = Depends(get_db)):
 @app.get('/blog/{id}', status_code=200)
 def detail_blog(id, db: Session = Depends(get_db)):
     blog = db.query(BlogModel).filter(BlogModel.id == id).first()
+    
+    if not blog:
+        raise HTTPException(status_code=404, detail='Blog not found')
+    
     return blog
