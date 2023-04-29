@@ -3,6 +3,11 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 
+'''
+  
+    Database connection
+
+'''
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///blog.db"
 # SQLALCHEMY_DATABASE_URL = "mysql://root:9723@127.0.0.1/blog_db"
@@ -13,3 +18,18 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+
+'''
+  
+    Database setup function
+
+'''
+
+
+def get_db():
+   db = SessionLocal()
+   try:
+       yield db
+   finally:
+       db.close()
+

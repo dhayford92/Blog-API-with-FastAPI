@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+from user.schemas import UserOut
+
 
 
 
@@ -9,3 +11,12 @@ class Blog(BaseModel):
     author: str
     body: str | None = None
     published: bool = True
+    
+    
+class ShowBlog(BaseModel):
+    title: str
+    author: UserOut
+    body: str | None = None
+    
+    class Config():
+        orm_mode = True
