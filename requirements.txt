@@ -1,5 +1,6 @@
 fastapi
 uvicorn
-sqlalchemy
 passlib
 bcrypt
+tortoise-orm
+email-validator

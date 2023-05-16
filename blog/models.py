@@ -1,26 +1,54 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
-
-from settings import Base
-
+from tortoise import models, fields
+from user.models import User
+from tortoise.contrib.pydantic import pydantic_models_creator as serializer
 
 
 
+class Category(models.Model):
+    name = fields.CharField(max_length=255)
+    class Meta:
+        table = 'category'
+        
+        
 
 
 
-
-class BlogModel(Base):
-    __tablename__ = "blogs"
+class Blog(models.Model):
+    author = fields.ForeignKeyField(User, related_name='blog')
+    title = fields.CharField(max_length=255)
+    body = fields.TextField(null=True)
+    categories = fields.ManyToManyField(Category)
+    is_published = fields.BooleanField(default=False, null=True)
+    created_at = fields.DateTimeField(auto_now_add=True)
+    modified_at = fields.DateTimeField(auto_now=True, null=True)
     
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String)
-    body = Column(String)
-    publish = Column(Boolean, default=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    author = relationship('UserModel', back_populates="blogs")
+    def __str__(self):
+        return f'{self.author.email} - {self.title}'
     
-    
-    
+    class Meta:
+        table = 'blogs'
+        ordering = ['-created_at', '-modified_at']
+        
+        
+        
+        
 
+class Comment(models.Model):
+    user = fields.ForeignKeyField(User, related_name='comments')
+    blog = fields.ForeignKeyField(Blog, related_name='blog_comments')
+    message = fields.TextField()
+    created_at = fields.DateTimeField(auto_now_add=True)   
     
+    class Meta:
+        table = 'comments'
+        ordering = ['-created_at'] 
+        
+        
+        
+        
+
+
+# --- serialization with pydantic ---
+CategorySerializer = serializer(Category, name="Category")
+CategoryInSerializer = serializer(Category, name="CategoryIn", exclude_readonly=True)
+
