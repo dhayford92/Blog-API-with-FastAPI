@@ -4,3 +4,4 @@ passlib
 bcrypt
 tortoise-orm
 email-validator
+fastapi-jwt-auth

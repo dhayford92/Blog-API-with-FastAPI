@@ -1,10 +1,19 @@
 from passlib.context import CryptContext
-# from datetime import datetime, timedelta
-# from typing import Union, Any
-# from settings import *
-# from jose import jwt, JWTError
 from tortoise import fields, models
+from fastapi_jwt_auth import AuthJWT
 from tortoise.contrib.pydantic import pydantic_model_creator
+
+
+
+class Auth:
+    
+    def get_current_user():
+        pass
+    
+    def get_admin_current_user():
+        pass
+
+
 
 
 
@@ -27,33 +36,16 @@ class User(models.Model):
         pwd_cxt = CryptContext(schemes=['bcrypt'], deprecated="auto")
         return pwd_cxt.verify(password, self.password)
     
+    def tokens(self, auth = AuthJWT):
+        access_token = auth.create_access_token(subject=self.email)
+        refresh_token = auth.create_refresh_token(subject=self.email)
+        return {
+            'access_token': access_token,
+            'refresh_token': refresh_token,
+        }
+
+    
     
 
-UserPydantic = pydantic_model_creator(User, name="User")
+UserOutPydantic = pydantic_model_creator(User, name="User", exclude=('password', 'created', ))
 UserPydanticAuth = pydantic_model_creator(User, name="UserAuth", exclude_readonly=True)   
-
-
-
-    
-    
-
-# def create_access_token(subject: Union[str, Any], expires_delta: int = None) -> str:
-#     if expires_delta is not None:
-#         expires_delta = datetime.utcnow() + expires_delta
-#     else:
-#         expires_delta = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    
-#     to_encode = {"exp": expires_delta, "sub": str(subject)}
-#     encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, ALGORITHM)
-#     return encoded_jwt
-
-
-# def create_refresh_token(subject: Union[str, Any], expires_delta: int = None) -> str:
-#     if expires_delta is not None:
-#         expires_delta = datetime.utcnow() + expires_delta
-#     else:
-#         expires_delta = datetime.utcnow() + timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
-    
-#     to_encode = {"exp": expires_delta, "sub": str(subject)}
-#     encoded_jwt = jwt.encode(to_encode, JWT_REFRESH_SECRET_KEY, ALGORITHM)
-#     return encoded_jwt

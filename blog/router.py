@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException
-from .schemas import Blog, ShowBlog
 from .models import *
 
 
@@ -10,51 +9,45 @@ router = APIRouter(
 )
 
 
-@router('/category/', status_code=201)
+@router.post('/category/', status_code=201)
 async def create_category(req: CategoryInSerializer):
-    category = await Category.create(**req.json(exclude_unset=True))
+    await Category.create(name=req.name)
     return {
-        'message': 'Category created successfully',
-        'data': ''
+        'message': 'Category created successfully'
     }
 
 
 
 
 
-
-
-
-
-
-@router.post('/create', status_code=201)
-def create_blog(blog: Blog):
+@router.post('/blog', status_code=201)
+def create_blog():
     pass
 
 
 
 
-@router.get('/', status_code=200)
+@router.get('/blog', status_code=200)
 def all_blogs():
     pass
 
 
 
 
-@router.get('/detail/{id}', status_code=200)
+@router.get('/blog/{id}', status_code=200)
 def detail_blog(id):
     pass
 
 
 
 
-@router.put('/update/{id}', status_code=202, response_model=ShowBlog)
-def update_blog(id, new_blog: Blog):
+@router.put('blog/update/{id}', status_code=200)
+def update_blog(id):
     pass
     
     
     
-@router.delete('/delete/{id}', status_code=204)
+@router.delete('blog/delete/{id}', status_code=204)
 def delete_blog(id):
     pass
     

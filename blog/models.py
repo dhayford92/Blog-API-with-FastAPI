@@ -1,6 +1,5 @@
 from tortoise import models, fields
-from user.models import User
-from tortoise.contrib.pydantic import pydantic_models_creator as serializer
+from tortoise.contrib.pydantic import pydantic_model_creator as serializer
 
 
 
@@ -14,13 +13,13 @@ class Category(models.Model):
 
 
 class Blog(models.Model):
-    author = fields.ForeignKeyField(User, related_name='blog')
+    author = fields.ForeignKeyField('models.User', related_name='blog')
     title = fields.CharField(max_length=255)
     body = fields.TextField(null=True)
-    categories = fields.ManyToManyField(Category)
+    categories = fields.ManyToManyField('models.Category')
     is_published = fields.BooleanField(default=False, null=True)
-    created_at = fields.DateTimeField(auto_now_add=True)
-    modified_at = fields.DateTimeField(auto_now=True, null=True)
+    created_at = fields.DatetimeField(auto_now_add=True)
+    modified_at = fields.DatetimeField(auto_now=True, null=True)
     
     def __str__(self):
         return f'{self.author.email} - {self.title}'
@@ -34,10 +33,10 @@ class Blog(models.Model):
         
 
 class Comment(models.Model):
-    user = fields.ForeignKeyField(User, related_name='comments')
-    blog = fields.ForeignKeyField(Blog, related_name='blog_comments')
+    user = fields.ForeignKeyField('models.User', related_name='comments')
+    blog = fields.ForeignKeyField('models.Blog', related_name='blog_comments')
     message = fields.TextField()
-    created_at = fields.DateTimeField(auto_now_add=True)   
+    created_at = fields.DatetimeField(auto_now_add=True)   
     
     class Meta:
         table = 'comments'
