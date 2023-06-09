@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from passlib.context import CryptContext
 from user.models import *
 from user.schemas import *
 from fastapi_jwt_auth import AuthJWT
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 
 
@@ -12,11 +13,27 @@ router = APIRouter(
 )
 
 
+security = HTTPBearer(
+    scheme_name='Blog Auth',
+    description='Add your access token here to get access to your blog and other blog content.'
+)
+
+
+def get_current_user(auth: AuthJWT = Depends(), credentails: HTTPAuthorizationCredentials = Depends(security)):
+    try:
+        auth.jwt_required()
+    except:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='User not authorized')
+    user = auth.get_jwt_subject()
+    return user
+
+
+
 @router.post('/create', status_code=201)
 async def create_user(request: UserRegister):
     pwd_cxt = CryptContext(schemes=['bcrypt'], deprecated="auto")
 
-    users = await User.filter(email=request.email).all()
+    users = await User.filter(email=request.email)
     if users:
         raise HTTPException(status_code=404, detail="Email already registered")
 
@@ -47,6 +64,7 @@ async def login(req: UserLogin, authenticate: AuthJWT=Depends()):
      
 
 
+
 @router.get('/refresh-token', status_code=200)
 async def reset_token(authorization: AuthJWT=Depends()):
     try:
@@ -59,14 +77,11 @@ async def reset_token(authorization: AuthJWT=Depends()):
 
 
 
-@router.get('/detail/{id}', status_code=200, response_model=UserOut)
-async def get_user(id, auth: AuthJWT= Depends()): 
-    try:
-        auth.get_jwt_subject()
-    except:
-        raise HTTPException(status_code=401, detail="Unauthorized access")
+
+@router.get('/detail', status_code=200, response_model=UserOut)
+async def get_user(auth: get_current_user = Depends()): 
     try: 
-        user = await User.get(id=id)
+        user = await User.get(email=auth)
         return user
     except:
         raise HTTPException(status_code=404, detail="User not found")
@@ -74,12 +89,10 @@ async def get_user(id, auth: AuthJWT= Depends()):
 
 
 
-
-
 @router.patch('/update/{id}', status_code=200)
-async def update_user(id, full_name: str):  
+async def update_user(full_name: str, auth: get_current_user = Depends()):  
     try: 
-        user = await User.get(id=id)
+        user = await User.get(email=auth)
         user.full_name = full_name
         await user.save()
     except:

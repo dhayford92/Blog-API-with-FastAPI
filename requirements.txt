@@ -3,5 +3,7 @@ uvicorn
 passlib
 bcrypt
 tortoise-orm
+aerich
 email-validator
 fastapi-jwt-auth
+python-multipart

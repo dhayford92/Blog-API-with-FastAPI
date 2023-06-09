@@ -1,10 +1,16 @@
 from tortoise import models, fields
-from tortoise.contrib.pydantic import pydantic_model_creator as serializer
+from aerich.models import Aerich
+
+
 
 
 
 class Category(models.Model):
+    image = fields.TextField()
     name = fields.CharField(max_length=255)
+    
+    def __str__(self) -> str:
+        return self.name
     class Meta:
         table = 'category'
         
@@ -13,10 +19,11 @@ class Category(models.Model):
 
 
 class Blog(models.Model):
-    author = fields.ForeignKeyField('models.User', related_name='blog')
+    image = fields.TextField()
+    author = fields.ForeignKeyField('models.User', related_name='users')
     title = fields.CharField(max_length=255)
     body = fields.TextField(null=True)
-    categories = fields.ManyToManyField('models.Category')
+    categories = fields.ManyToManyField('models.Category', related_name='category')
     is_published = fields.BooleanField(default=False, null=True)
     created_at = fields.DatetimeField(auto_now_add=True)
     modified_at = fields.DatetimeField(auto_now=True, null=True)
@@ -44,10 +51,3 @@ class Comment(models.Model):
         
         
         
-        
-
-
-# --- serialization with pydantic ---
-CategorySerializer = serializer(Category, name="Category")
-CategoryInSerializer = serializer(Category, name="CategoryIn", exclude_readonly=True)
-
